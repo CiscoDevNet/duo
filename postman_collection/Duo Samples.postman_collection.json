@@ -1,0 +1,261 @@
+{
+	"info": {
+		"_postman_id": "9745978a-dbcf-4441-9bd9-15a3c2ad554d",
+		"name": "Duo Samples",
+		"description": "This collection contains a pre-request script that automatically generates the HMAC signature needed for authentication using the components of the API request and the Duo Integration keys that are stored in a Postman environment.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "1497029"
+	},
+	"item": [
+		{
+			"name": "Retrieve Users no params",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Basic {{accessToken}}"
+					},
+					{
+						"key": "Date",
+						"value": "{{date}}"
+					}
+				],
+				"url": {
+					"raw": "https://{{api_hostname}}/admin/v1/users?limit=1&offset=1",
+					"protocol": "https",
+					"host": [
+						"{{api_hostname}}"
+					],
+					"path": [
+						"admin",
+						"v1",
+						"users"
+					],
+					"query": [
+						{
+							"key": "limit",
+							"value": "1"
+						},
+						{
+							"key": "offset",
+							"value": "1"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Retrieve Users w/params",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Basic {{accessToken}}"
+					},
+					{
+						"key": "Date",
+						"value": "{{date}}"
+					}
+				],
+				"url": {
+					"raw": "https://{{api_hostname}}/admin/v1/users?limit=1&offset=1",
+					"protocol": "https",
+					"host": [
+						"{{api_hostname}}"
+					],
+					"path": [
+						"admin",
+						"v1",
+						"users"
+					],
+					"query": [
+						{
+							"key": "limit",
+							"value": "1"
+						},
+						{
+							"key": "offset",
+							"value": "1"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create User",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Basic {{accessToken}}",
+						"type": "text"
+					},
+					{
+						"key": "Date",
+						"value": "{{date}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "username",
+							"value": "",
+							"description": "The name of the user to create.",
+							"type": "text"
+						},
+						{
+							"key": "firstname",
+							"value": "",
+							"description": "The user's given name.",
+							"type": "text"
+						},
+						{
+							"key": "lastname",
+							"value": "",
+							"description": "The user's surname.",
+							"type": "text"
+						},
+						{
+							"key": "email",
+							"value": "",
+							"description": "The email address of this user.",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "https://{{api_hostname}}/admin/v1/users",
+					"protocol": "https",
+					"host": [
+						"{{api_hostname}}"
+					],
+					"path": [
+						"admin",
+						"v1",
+						"users"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					"/* Generate the current date in UTC format. */",
+					"let date = new Date().toUTCString();",
+					"",
+					"/* Get the values from the HTTP request. */",
+					"let method = pm.request.method;",
+					"let hostname = pm.environment.get(\"api_hostname\");",
+					"let path = pm.request.url.getPath();",
+					"",
+					"/* Get the params depending on HTTP Method (per doc).",
+					" * Params need to be in alphabetical order and values",
+					" * must be url encoded.",
+					"*/",
+					"let params_array = [];",
+					"",
+					"/* Get the parameters from the query params. */",
+					"let query_params = pm.request.url.getQueryString();",
+					"if (query_params.length > 0) {",
+					"    params_array = query_params.split('&');",
+					"}",
+					"",
+					"/* Get the parameters from the request body. */",
+					"if (pm.request.body.urlencoded) {",
+					"    let body = pm.request.body.urlencoded.map();",
+					"    for(let i = 0; i < body.length; i++) {",
+					"        params_array.push(body[i]['key'] + '=' + encodeURIComponent(body[i]['value']))",
+					"    } ",
+					"}",
+					"params = params_array.sort().join('&');",
+					"",
+					"/* Build the ascii string. */",
+					"let ascii_string = date + '\\n' +",
+					"                   method + '\\n' +",
+					"                   hostname + '\\n' +",
+					"                   path + '\\n' +",
+					"                   params;",
+					"",
+					"/* Generate the HMAC SHA-1 hash. */",
+					"let secret_key = pm.environment.get(\"secret_key\");",
+					"const cryptoJS = require('crypto-js');",
+					"var hashHmacSHA1 = cryptoJS.HmacSHA1(ascii_string, secret_key).toString();",
+					"/* Generate the Basic Authentication token using username:password. */",
+					"let auth_str = pm.environment.get(\"integration_key\") + ':' + hashHmacSHA1",
+					"accessToken = Buffer.from(auth_str).toString('base64');",
+					"",
+					"/* Set the variables. */",
+					"pm.variables.set('date', date)",
+					"pm.variables.set('accessToken', accessToken);"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}
